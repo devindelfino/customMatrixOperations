@@ -10,5 +10,6 @@ This project is aimed to dive into the computer algorithms used to perform linea
 * transposition
 * row reduction
 * determinant calculation
+* inversion
 * eigenvector/eigenvalue calculation
 * solving linear systems of equations (using both direct and iterative methods)
