@@ -1,6 +1,8 @@
 customMatrixOperations
 ======================
-#The goal of this project is to dive into the computer algorithms used to perform linear algebra functions with matrices. This program is written using MATLAB and Object-Oriented Principles.
+#Objective
+
+This project is aimed to dive into the computer algorithms used to perform linear algebra functions with matrices. This program is written using MATLAB and Object-Oriented Principles.
 
 ####Implementations of custom linear algebra functions (from scratch) include:
 
