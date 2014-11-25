@@ -98,6 +98,32 @@ classdef Matrix
 		end
 
 		% MATRIX MULTIPLICATION ------------------------------------------------------------------------------------------
+		function M = mtimes(A, B) % equivalent to (A * B)
+			% Description: Matrix Multiplies Matrix A and Matrix A (A's columns must equal B's rows)
+			% Parameters: A - a custom Matrix object
+			%             B - a custom Matrix object
+			% Returns: The matrix containing the product of matrices A and B 
+
+			A_size = A.dims();
+			B_size = B.dims();
+
+			if(A_size(2) == B_size(1))
+				prod_mat = zeros(A_size(1), B_size(2));
+
+				for(itC = 1:A_size(2))
+					for(itR = 1:A_size(1))
+						prod_mat(itR, itC) = A.get_element(itR, itC) - B.get_element(itR, itC);
+					end
+				end
+
+				M = Matrix(prod_mat);
+
+			else % the number of columns in A and the number of columns in B don't agree.
+				% raise error
+				error('Inner Matrix dimensions must agree 
+					   (the number of columns in the first matrix must equal the number of rows in the second matrix)')
+			end
+		end
 
 		% MATRIX TRANSPOSITION  ------------------------------------------------------------------------------------------
 		function M = transpose(A) % equivalent to (A.')
