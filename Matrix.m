@@ -140,6 +140,31 @@ classdef Matrix
 			end
 		end
 
+		% LU FACTORIZATION *WITHOUt PARTIAL PIVOTING ------------------------------------------------------------------------------------------
+		% Used Algorithm from http://www.math.iit.edu/~fass/477577_Chapter_7.pdf, page 66
+		function [U L P]= LU_factor(A) 
+			% Description: Calculates the Upper and Lower triangular matrices of Matrix A along with the permutation Matrix P for stability
+			% Parameters: A - a custom Matrix object
+			% Returns: The Upper triangular Matrix (U), the Lower triangular Matrix (L), and the Permutation Matrix (P)
+			dimensions = A.dims();
+			m = dimensions(1); n = dimensions(2);
+
+			if(m == n) % check for a square matrix
+
+				Upper = A.get_elements(:,:); Lower = eye(m); Perm = eye(m);
+				for(k = 1:(m-1))
+					for(j = (k+1):m)
+						Lower(j, k) = Upper(j, k) / Upper(k, k);
+						Upper(j, k:m) = Upper(j, k:m) - Lower(j, k) * Upper(k, k:m);
+						end
+				end
+
+				U = Matrix(Upper); L = Matrix(Lower); P = Matrix(Perm);
+			else
+				error('Starting Matrix must be square.')
+			end
+		end
+
 		% MATRIX INVERSION ------------------------------------------------------------------------------------------
 		function M = invert(A) 
 			% Description: Calculates the inverse matrix of Matrix A
