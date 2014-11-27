@@ -46,6 +46,21 @@ classdef Matrix
 			elmt = A.data(i, j);
 		end
 
+		% MATRIX TRANSPOSITION  ------------------------------------------------------------------------------------------
+		function M = transpose(A) % equivalent to (A.')
+			% Description: Transposes the Matrix
+			% Parameters: None
+			% Returns: The transposition Matrix of Matrix A
+			temp_size = A.dims();
+			trans_mat = zeros(temp_size(2), temp_size(1));
+
+			for(itR = 1:temp_size(2))
+				trans_mat(itR,:) = A.get_elements(:,itR);
+			end
+
+			M = Matrix(trans_mat);
+		end
+
 		% MATRIX ADDITION ------------------------------------------------------------------------------------------
 
 		function M = plus(A, B) % equivalent to (A + B)
@@ -81,15 +96,15 @@ classdef Matrix
 
 			if(A.dims() == B.dims())
 				temp_size = A.dims();
-				sum_mat = zeros(temp_size(1), temp_size(2));
+				diff_mat = zeros(temp_size(1), temp_size(2));
 
 				for(itR = 1:temp_size(1))
 					for(itC = 1:temp_size(2))
-						sum_mat(itR, itC) = A.get_element(itR, itC) - B.get_element(itR, itC);
+						diff_mat(itR, itC) = A.get_element(itR, itC) - B.get_element(itR, itC);
 					end
 				end
 
-				M = Matrix(sum_mat);
+				M = Matrix(diff_mat);
 
 			else % matrix dimensions don't agree
 				% raise error
@@ -109,10 +124,11 @@ classdef Matrix
 
 			if(A_size(2) == B_size(1))
 				prod_mat = zeros(A_size(1), B_size(2));
-
-				for(itC = 1:A_size(2))
-					for(itR = 1:A_size(1))
-						prod_mat(itR, itC) = A.get_element(itR, itC) - B.get_element(itR, itC);
+				for(itR = 1:A_size(1))
+					for(itC = 1:B_size(2))
+						size(A.get_elements(itR,:))
+						size(B.get_elements(:,itC))
+						prod_mat(itR, itC) = sum(A.get_elements(itR,:) .* transpose(B.get_elements(:,itC)));
 					end
 				end
 
@@ -120,24 +136,9 @@ classdef Matrix
 
 			else % the number of columns in A and the number of columns in B don't agree.
 				% raise error
-				error('Inner Matrix dimensions must agree 
-					   (the number of columns in the first matrix must equal the number of rows in the second matrix)')
+				error('Inner Matrix dimensions must agree (the number of columns in the first matrix must equal the number of rows in the second matrix)')
 			end
 		end
 
-		% MATRIX TRANSPOSITION  ------------------------------------------------------------------------------------------
-		function M = transpose(A) % equivalent to (A.')
-			% Description: Transposes the Matrix
-			% Parameters: None
-			% Returns: The transposition Matrix of Matrix A
-			temp_size = A.dims();
-			new_mat = zeros(temp_size(2), temp_size(1));
-
-			for(itR = 1:temp_size(2))
-				new_mat(itR,:) = A.get_elements(:,itR);
-			end
-
-			M = Matrix(new_mat);
-		end
 	end % end methods
 end % end classdef
