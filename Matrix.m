@@ -140,5 +140,22 @@ classdef Matrix
 			end
 		end
 
+		% MATRIX INVERSION ------------------------------------------------------------------------------------------
+		function M = invert(A) 
+			% Description: Calculates the inverse matrix of Matrix A
+			% Parameters: A - a custom Matrix object
+			% Returns: The inverse matrix or [0] if not invertible 
+
+			
+		end
+
+		% DETERMINANT ------------------------------------------------------------------------------------------
+		function determinant = det(A) 
+			% Description: Calculates the determinant of matrix A
+			% Parameters: A - a custom Matrix object
+			% Returns: The determinant of Matrix A
+
+			
+		end
 	end % end methods
 end % end classdef
