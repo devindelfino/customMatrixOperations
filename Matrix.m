@@ -31,13 +31,19 @@ classdef Matrix
 			M.r = temp_size(1);
 			M.c = temp_size(2);
 			M.data = mat;
-			if(det(mat) == 0)
-				M.invertible = 0;
-				M.determinant = 0;
-			else
-				M.invertible = 1;
-			end
 
+			if(M.r == M.c)
+				if(det(mat) == 0)
+					M.invertible = 0;
+					M.determinant = 0;
+				else
+					M.invertible = 1;
+				end
+			else
+				M.invertible = 0;
+				M.determinant = NaN;
+			end
+			M.dominant_eigen_value = 0;
 		end
 
 		% DISPLAY ------------------------------------------------------------------------------------------
@@ -276,23 +282,22 @@ classdef Matrix
 			dimensions = A.dims();
 			m = dimensions(1); n = dimensions(2);
 
-			if(n == 1)
+			if(m == 1 | n == 1)
 				temp = A.get_elements(:,:);
 				len = sqrt(sum(temp.^2));
 				M = Matrix(temp./len);
-			else % matrix dimensions don't agree
+			else% matrix dimensions don't agree
 				% raise error
-				error('Only vectors can be normalized (one column).')
+				error('Only vectors can be normalized (one column or one row).')
 			end
 		end
-		
+
 		% EIGENVALUES (POWER TECHNIQUE) ------------------------------------------------------------------------------------------
 		% Source: http://www.robots.ox.ac.uk/~sjrob/Teaching/EngComp/linAlg34.pdf, page 81
-		function M = eigenvalues_power(A) 
-			% Description: Calculates the inverse matrix of Matrix A
+		function M = eig_power(A) 
+			% Description: Calculates the dominant eigenvalue of the matrix using the Power Method Iterative Technique
 			% Parameters: A - a custom Matrix object
-			% Returns: The inverse matrix or a matrix of inf values if not-invertible
-			
+			% Returns: The eigenvalue	
 		end
 
 	end % end methods
