@@ -11,6 +11,7 @@ classdef Matrix
 	properties
 		determinant = NaN;
 		invertible = 0;
+		dominant_eigen_value = NaN;
 	end
 
 	methods
@@ -161,7 +162,7 @@ classdef Matrix
 
 		% LU FACTORIZATION WITH PARTIAL PIVOTING ------------------------------------------------------------------------------------------
 		% Used Algorithm from http://www.math.iit.edu/~fass/477577_Chapter_7.pdf, page 66
-		function [L U P]= LU_factor(A) 
+		function [L U P]= LU_factor(A)
 			% Description: Calculates the Upper and Lower triangular matrices of square Matrix A along with the permutation Matrix P for stability
 			% Parameters: A - a custom Matrix object
 			% Returns: The Upper triangular Matrix (U), the Lower triangular Matrix (L), and the Permutation Matrix (P)
@@ -266,6 +267,34 @@ classdef Matrix
 				error('Starting Matrix must be square.')
 			end
 		end
+
+		% NORMALIZE ------------------------------------------------------------------------------------------
+		function M = normalize(A)
+			% Description: Normalizes the vector A
+			% Parameters: A -  Vector A
+			% Returns: The normalized vector M
+			dimensions = A.dims();
+			m = dimensions(1); n = dimensions(2);
+
+			if(n == 1)
+				temp = A.get_elements(:,:);
+				len = sqrt(sum(temp.^2));
+				M = Matrix(temp./len);
+			else % matrix dimensions don't agree
+				% raise error
+				error('Only vectors can be normalized (one column).')
+			end
+		end
+		
+		% EIGENVALUES (POWER TECHNIQUE) ------------------------------------------------------------------------------------------
+		% Source: http://www.robots.ox.ac.uk/~sjrob/Teaching/EngComp/linAlg34.pdf, page 81
+		function M = eigenvalues_power(A) 
+			% Description: Calculates the inverse matrix of Matrix A
+			% Parameters: A - a custom Matrix object
+			% Returns: The inverse matrix or a matrix of inf values if not-invertible
+			
+		end
+
 	end % end methods
 
 end % end classdef
