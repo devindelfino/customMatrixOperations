@@ -10,3 +10,6 @@ Ac = Matrix(Am);
 
 Bm = magic(5);
 Bc = Matrix(Bm);
+
+t = [1 2 3; 3 4 5; 8 3 4];
+T = Matrix(t);

@@ -292,12 +292,67 @@ classdef Matrix
 			end
 		end
 
+		% MAX ------------------------------------------------------------------------------------------
+		function maximum = max(A) 
+			% Description: Finds the maximum element in a Vector
+			% Parameters: A - a custom Matrix object
+			% Returns: The maximum element
+			
+			maximum = max(A.data);
+		end
+
+		% SCALAR DIVISION ------------------------------------------------------------------------------------------
+		function M = rdivide(A, scalar) 
+			% Description: Divides each element in the Matrix by a scalar (equivalent to A ./ scalar)
+			% Parameters: A - a custom Matrix object
+			%             scalar - a scalar
+			% Returns: The quotient matrix
+			
+			if(scalar == 0)
+				error('Cannot divide by zero');
+			else
+				M = Matrix(A.data ./ scalar);
+			end
+		end
+
+		% 1x1 MATRIX DIVISION ------------------------------------------------------------------------------------------
+		function quotient = mrdivide(A, B) 
+			dimensions = A.dims();
+			mA = dimensions(1); nA = dimensions(2);
+			dimensions = B.dims();
+			mB = dimensions(1); nB = dimensions(2);
+
+			if(mA == 1 & nA == 1 & mB == 1 & nB == 1)
+				quotient = A.data ./ B.data;
+			else
+				error('Can only divide single values');
+			end
+		end
+
 		% EIGENVALUES (POWER TECHNIQUE) ------------------------------------------------------------------------------------------
 		% Source: http://www.robots.ox.ac.uk/~sjrob/Teaching/EngComp/linAlg34.pdf, page 81
-		function M = eig_power(A) 
+		function [eig_value eig_vector] = eig_dominant(A, iterations) 
 			% Description: Calculates the dominant eigenvalue of the matrix using the Power Method Iterative Technique
 			% Parameters: A - a custom Matrix object
-			% Returns: The eigenvalue	
+			% Returns: The dominant eigenvalue	
+			dimensions = A.dims();
+			m = dimensions(1); n = dimensions(2);
+
+			if(m == n)
+				current_vector = Matrix(zeros(n, 1) + 1);
+				next_vector = current_vector;
+
+				for(it = 1:iterations)
+					next_it = A * current_vector;
+					next_vector = next_it.normalize();
+					current_vector = next_vector;
+				end
+
+				eig_vector = current_vector ./ max(current_vector);
+				eig_value = (eig_vector.' * (A * eig_vector )) / (eig_vector.' * eig_vector);
+			else
+				error('Starting Matrix must be square.')
+			end
 		end
 
 	end % end methods
