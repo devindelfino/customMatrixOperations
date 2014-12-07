@@ -87,6 +87,31 @@ classdef Matrix
 			M = Matrix(trans_mat);
 		end
 
+		% MATRIX EQUALITY (custom, MATLAB) ------------------------------------------------------------------------------------------
+
+		function tf = eq(A,b)
+			% Description: Tests for equality between A and B to a factor of 0.0001
+			% Parameters: A - a custom Matrix object
+			%             B - a matlab Matrix object
+			% Returns: boolean stating whether or not A == B
+			
+			ERR = 0.0001;
+			adims = A.dims();
+			bdims = size(b);
+
+			a = A.get_elements(:,:);
+
+			if(adims == bdims)
+				if(all(abs(a-b) < ERR))
+					tf = 1;
+				else
+					tf = 0;
+				end
+			else
+				tf = 0;
+			end
+		end
+
 		% MATRIX ADDITION ------------------------------------------------------------------------------------------
 
 		function M = plus(A, B) % equivalent to (A + B)
@@ -126,7 +151,7 @@ classdef Matrix
 
 				for(itR = 1:temp_size(1))
 					for(itC = 1:temp_size(2))
-						diff_mat(itR, itC) = A.get_element(itR, itC) - B.get_element(itR, itC);
+						diff_mat(itR, itC) = A.get_elements(itR, itC) - B.get_elements(itR, itC);
 					end
 				end
 
@@ -176,7 +201,7 @@ classdef Matrix
 			m = dimensions(1); n = dimensions(2);
 
 			if(m == n) % check for a square matrix
-				perm_parity = 0;
+				perm_parity = 0; %used to predetermine determinant of permuation matrix
 				Upper = A.get_elements(:,:); Lower = eye(m); Perm = eye(m);
 				for(k = 1:(m-1))
 
@@ -204,7 +229,7 @@ classdef Matrix
 							Lower(j, k) = Upper(j, k) / Upper(k, k);
 						end
 						Upper(j, k:m) = Upper(j, k:m) - Lower(j, k) * Upper(k, k:m);
-						end
+					end
 				end
 
 
@@ -216,26 +241,6 @@ classdef Matrix
 					P.determinant = -1;
 				end
 
-			else
-				error('Starting Matrix must be square.')
-			end
-		end
-
-		% MATRIX INVERSION ------------------------------------------------------------------------------------------
-		function M = invert(A) 
-			% Description: Calculates the inverse matrix of Matrix A
-			% Parameters: A - a custom Matrix object
-			% Returns: The inverse matrix or a matrix of inf values if not-invertible
-			dimensions = A.dims();
-			m = dimensions(1); n = dimensions(2);
-
-			if(m == n) % check for square matrix
-				if(A.invertible)
-					% calculate inverse
-				else
-					display('The matrix is singular because it has a determinant of 0 (not invertible).')
-					M = zeros(m) + inf;
-				end
 			else
 				error('Starting Matrix must be square.')
 			end
@@ -331,9 +336,10 @@ classdef Matrix
 
 		% EIGENVALUES (POWER TECHNIQUE) ------------------------------------------------------------------------------------------
 		% Source: http://www.robots.ox.ac.uk/~sjrob/Teaching/EngComp/linAlg34.pdf, page 81
-		function [eig_value eig_vector] = eig_dominant(A, iterations) 
+		function [eig_vector eig_value] = eig_dominant(A, iterations) 
 			% Description: Calculates the dominant eigenvalue of the matrix using the Power Method Iterative Technique
 			% Parameters: A - a custom Matrix object
+			%             iterations - an integer representing the number of iterations desired
 			% Returns: The dominant eigenvalue	
 			dimensions = A.dims();
 			m = dimensions(1); n = dimensions(2);
@@ -355,6 +361,131 @@ classdef Matrix
 			end
 		end
 
-	end % end methods
+		% EIGENVALUES (INVERSE TECHNIQUE) ------------------------------------------------------------------------------------------
+		% Source: http://mathreview.uwaterloo.ca/archive/voli/1/panju.pdf
+		function [eig_vectors eig_values] = eig_all(A, iterations) 
+			% Description: Calculates the eigenvectors/eigenvalues of the matrix A using the Arnoldi Iteration Method
+			% Parameters: A - a custom Matrix object
+			%             iterations - an integer representing the number of iterations desired
+			% Returns: All of the eigenvectors and eigenvalues of the matrix A	
+			
+			dimensions = A.dims();
+			m = dimensions(1); n = dimensions(2);
 
+			if(m == n)
+				shift = Matrix((est*eye(m)));
+				Ainv = A - shift;
+				current_vector = Matrix(zeros(n, 1) + 1);
+				next_vector = current_vector;
+
+				for(it = 1:iterations)
+
+					next_it = ge_linsolve(Ainv, current_vector);
+					next_vector = next_it.normalize();
+					current_vector = next_vector;
+				end
+
+				eig_vector = current_vector ./ max(current_vector);
+				eig_value = (eig_vector.' * (A * eig_vector )) / (eig_vector.' * eig_vector);
+			else
+				error('Starting Matrix must be square.')
+			end
+		end
+
+		% SOLVE LINEAR SYSTEM using LU FACTORIZATION AND GAUSSIAN ELIMINATION ------------------------------------------------------------------------------------------
+		% Source: http://www.cs.mtu.edu/~shene/COURSES/cs3621/NOTES/INT-APP/CURVE-linear-system.html
+		function X = ge_linsolve(A, B) 
+			% Description: Solve the linear system Ax = b for a square matrix A using LU Factorization and Gaussian Elimination (forward/backward substitution)
+			% Parameters: A - an m x m custom Matrix object
+			%             B - an m x k custom Matrix object
+			% Returns: The linear solution as an m x k custom Matrix object
+			dimensions = A.dims();
+			m = dimensions(1); n = dimensions(2);
+
+			if(m == n)
+				[L U P] = A.LU_factor();
+
+				% P * A = L * U =====> A = invP * L * U
+				
+				% A * X = B now becomes (L * U) * X = P * B
+
+				% 1) Since (L * U) * X = (P * B), => L * (U * X) = (P * B) => L * Y = (P * B) where Y = U * X (SOLVE FOR Y using forward substitution)
+				% 2) Since Y = U * X (SOLVE FOR X using backward substitution)
+
+				% 1) solve for Y, L * Y = P*B
+				% PB = B;
+				PB = P * B;
+				PBdims = PB.dims();
+				Y = zeros(n,PBdims(2));
+
+				% foward substitution
+				for(c = 1:PBdims(2))	% for each column in Y
+					Y(1,c) = PB.get_elements(1,c) ./ L.get_elements(1,1);
+
+					for(r = 2:n) % elements within the column
+						sum = 0;
+						for(k = 1:r-1)
+							sum = sum + (L.get_elements(r,k) .* Y(k,c));
+						end
+						Y(r,c) = (PB.get_elements(r,c) - sum) ./ L.get_elements(r,r);
+					end
+				end
+
+				% 2) solve for X, Y = U * X
+				
+				X = zeros(n,PBdims(2));
+
+				% backward substitution
+				for(c = 1:PBdims(2))	% for each column in X
+					X(n,c) = Y(n,c) ./ U.get_elements(n,n);
+
+					for(r = n-1:-1:1) % elements within the column
+						sum = 0;
+						for(k = r+1:n)
+							sum = sum + (U.get_elements(r,k) .* X(k,c));
+						end
+						X(r,c) = (Y(r,c) - sum) ./ U.get_elements(r,r);
+					end
+				end
+
+				X = Matrix(X);
+			else
+				error('Starting Matrix must be square.')
+			end
+		end
+
+		% SOLVE LINEAR SYSTEM using Gauss-Seidel Method ------------------------------------------------------------------------------------------
+		function X = gs_linsolve(A, B) 
+			% Description: Solve the linear system Ax = b for any matrix A using Gauss-Seidel Iterative Method
+			% Parameters: A - an m x n custom Matrix object
+			%             B - an m x k custom Matrix object
+			% Returns: The linear solution as an n x k custom Matrix object
+			dimensions = A.dims();
+			m = dimensions(1); n = dimensions(2);
+
+			
+		end
+
+		% MATRIX INVERSION ------------------------------------------------------------------------------------------
+		function M = inv(A) 
+			% Description: Calculates the inverse matrix of Matrix A
+			% Parameters: A - a custom Matrix object
+			% Returns: The inverse matrix or a matrix of inf values if not-invertible
+			dimensions = A.dims();
+			m = dimensions(1); n = dimensions(2);
+
+			if(m == n) % check for square matrix
+				if(A.invertible)
+					% calculate inverse
+					M = ge_linsolve(A, Matrix(eye(m)));
+				else
+					display('The matrix is singular because it has a determinant of 0 (not invertible).')
+					M = zeros(m) + inf;
+				end
+			else
+				error('Starting Matrix must be square.')
+			end
+		end
+
+	end % end methods
 end % end classdef
