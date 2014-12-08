@@ -72,7 +72,6 @@ Ac = Matrix(Am);
 Bm = randi([-15 15], 3);
 Bc = Matrix(Bm);
 
-
 assert(all(inv(Ac) == inv(Am)), 'Matrix Inversion FAILED.');
 assert(all(inv(Bc) == inv(Bm)), 'Matrix Inversion FAILED.');
 display('Matrix Inversion successful.')
@@ -94,14 +93,14 @@ display('Calculating the Determinant successful.')
 
 % ------------------------------------------------
 
-Am1 = randi([-15 15], 6);
+Am1 = randi([1 15], 6);
 Ac1 = Matrix(Am1);
-Am2 = randi([-15 15], 3);
+Am2 = randi([1 15], 3);
 Ac2 = Matrix(Am2);
 
-Bm1 = randi([-15 15], 6);
+Bm1 = randi([1 15], 6);
 Bc1 = Matrix(Bm1);
-Bm2 = randi([-15 15], 3);
+Bm2 = randi([1 15], 3);
 Bm2 = [Bm2 Bm2(:,2)];
 Bc2 = Matrix(Bm2);
 
@@ -110,10 +109,22 @@ xc = ge_linsolve(Ac1, Bc1);
 
 ym = linsolve(Am2, Bm2);
 yc = ge_linsolve(Ac2, Bc2);
-
 assert(all(xc == xm), 'Solving Linear System (GE) FAILED.');
 assert(all(yc == ym), 'Solving Linear System (GE) FAILED.');
 display('Solving Linear System (Gaussian Elimination) successful.')
+
+% ------------------------------------------------
+
+t = [5 -2 3; -3 9 1; 2 -1 -7];
+T = Matrix(t);
+b = [-1; 2; 3];
+B = Matrix(b);
+
+tm = linsolve(t,b);
+tc = gs_linsolve(T,B,10);
+
+assert(all(abs(tc - Matrix(tm)) < 0.001), 'Solving Linear System (GS) FAILED.');
+display('Solving Linear System (Gauss-Seidel Iteration) successful.')
 
 % ------------------------------------------------
 
@@ -124,4 +135,8 @@ Ac1 = Matrix(Am1);
 [dom_evec dom_eval] = eig_dominant(Ac1, 10);
 assert(abs(dom_eval - max(max(evals))) < 0.0001, 'Dominant Eigenvalue FAILED');
 display('Calculating Dominant Eigenvalue (Power Method) successful.')
+
+
+
+
 

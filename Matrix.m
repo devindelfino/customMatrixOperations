@@ -87,6 +87,39 @@ classdef Matrix
 			M = Matrix(trans_mat);
 		end
 
+		% MATRIX ABS  ------------------------------------------------------------------------------------------
+		function M = abs(A)
+			dimensions = A.dims();
+			m = dimensions(1); n = dimensions(2);
+			M = zeros(m,n);
+			for(row=1:m)
+				for(col=1:n)
+					M(row,col) = abs(A.get_elements(row,col));
+				end
+			end
+			M = Matrix(M);
+		end
+
+		% MATRIX <  ------------------------------------------------------------------------------------------
+		function tf = lt(A, val)
+			% Description: Tests for equality between A and B to a factor of 0.0001
+			% Parameters: A - a custom Matrix object
+			%             B - a matlab Matrix object
+			% Returns: boolean stating whether or not A == B
+			
+			adims = A.dims();
+			tf = 1;
+
+			for(row=1:adims(1))
+				for(col=1:adims(2))
+					if(A.get_elements(row,col) > val)
+						tf = 0;
+						break;
+					end
+				end
+			end
+		end
+
 		% MATRIX EQUALITY (custom, MATLAB) ------------------------------------------------------------------------------------------
 
 		function tf = eq(A,b)
@@ -363,11 +396,12 @@ classdef Matrix
 
 		% EIGENVALUES (INVERSE TECHNIQUE) ------------------------------------------------------------------------------------------
 		% Source: http://mathreview.uwaterloo.ca/archive/voli/1/panju.pdf
-		function [eig_vectors eig_values] = eig_all(A, iterations) 
-			% Description: Calculates the eigenvectors/eigenvalues of the matrix A using the Arnoldi Iteration Method
+		function [eig_vectors eig_values] = eig_closest(A, est, iterations) 
+			% Description: Calculates the eigenvector with eigenvalue closest to est of the matrix A using the Inverse Iteration Method
 			% Parameters: A - a custom Matrix object
+			%             est - an estimate of the eigenvalue
 			%             iterations - an integer representing the number of iterations desired
-			% Returns: All of the eigenvectors and eigenvalues of the matrix A	
+			% Returns: The eigenvector and eigenvalue closest to est
 			
 			dimensions = A.dims();
 			m = dimensions(1); n = dimensions(2);
@@ -375,6 +409,7 @@ classdef Matrix
 			if(m == n)
 				shift = Matrix((est*eye(m)));
 				Ainv = A - shift;
+				Ainv = inv(Ainv);
 				current_vector = Matrix(zeros(n, 1) + 1);
 				next_vector = current_vector;
 
@@ -401,8 +436,9 @@ classdef Matrix
 			% Returns: The linear solution as an m x k custom Matrix object
 			dimensions = A.dims();
 			m = dimensions(1); n = dimensions(2);
+			Bdims = B.dims();
 
-			if(m == n)
+			if(m == n & m == Bdims(1))
 				[L U P] = A.LU_factor();
 
 				% P * A = L * U =====> A = invP * L * U
@@ -455,15 +491,42 @@ classdef Matrix
 		end
 
 		% SOLVE LINEAR SYSTEM using Gauss-Seidel Method ------------------------------------------------------------------------------------------
-		function X = gs_linsolve(A, B) 
+		% code adapted from http://college.cengage.com/mathematics/larson/elementary_linear/5e/students/ch08-10/chap_10_2.pdf, example 2
+		function X = gs_linsolve(A, B, its) 
 			% Description: Solve the linear system Ax = b for any matrix A using Gauss-Seidel Iterative Method
 			% Parameters: A - an m x n custom Matrix object
 			%             B - an m x k custom Matrix object
 			% Returns: The linear solution as an n x k custom Matrix object
-			dimensions = A.dims();
-			m = dimensions(1); n = dimensions(2);
+			Adims = A.dims();
+			ma = Adims(1); na = Adims(2);
+			Bdims = B.dims();
+			mb = Bdims(1); nb = Bdims(2);
 
-			
+			if(ma == na & ma == mb)
+				x = zeros(na, nb);
+				resX = zeros(na,nb);
+				for(i = 1:its)
+				% while(not(all(resX)))
+					for(col = 1:nb) % each col
+						for(row = 1:na) % each element per col
+							% row
+							% col
+							row_elmts = 1:na;
+							row_elmts = row_elmts(row_elmts~=row);
+							row_elmts = [A.get_elements(row,row_elmts).*transpose(x(row_elmts,col)), B.get_elements(row,col)*-1];
+							temp = sum(row_elmts ./ (A.get_elements(row,row).*-1) );
+							
+							if(abs(x(row,col) - temp) < 0.01)
+								resX(row,col) = 1;
+							end
+							x(row,col) = temp;
+						end
+					end
+				end
+				X = Matrix(x);
+			else
+				error('For gs_linsolve(A,B), A must be n x n, B must be n x k')
+			end
 		end
 
 		% MATRIX INVERSION ------------------------------------------------------------------------------------------
