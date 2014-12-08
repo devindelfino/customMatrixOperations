@@ -8,9 +8,7 @@ This project is aimed to dive into the computer algorithms used to perform linea
 
 * matrix addition, subtraction, multiplication
 * transposition
-* row reduction
 * determinant calculation
 * inversion
-* eigenvector/eigenvalue calculation
-* solving linear systems of equations (using both direct and iterative methods)
-* EDIT THESE!
+* eigenvector/eigenvalue calculation (Power Method, Inverse Iteration)
+* solving linear systems of equations (Gaussian Elimination, Gauss-Seidel Method)

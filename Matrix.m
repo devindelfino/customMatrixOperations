@@ -396,10 +396,9 @@ classdef Matrix
 
 		% EIGENVALUES (INVERSE TECHNIQUE) ------------------------------------------------------------------------------------------
 		% Source: http://mathreview.uwaterloo.ca/archive/voli/1/panju.pdf
-		function [eig_vectors eig_values] = eig_closest(A, est, iterations) 
-			% Description: Calculates the eigenvector with eigenvalue closest to est of the matrix A using the Inverse Iteration Method
+		function [eig_vector eig_value] = eig_smallest(A, iterations) 
+			% Description: Calculates the eigenvector with least dominant eigenvalue of the matrix A using the Inverse Iteration Method
 			% Parameters: A - a custom Matrix object
-			%             est - an estimate of the eigenvalue
 			%             iterations - an integer representing the number of iterations desired
 			% Returns: The eigenvector and eigenvalue closest to est
 			
@@ -407,15 +406,12 @@ classdef Matrix
 			m = dimensions(1); n = dimensions(2);
 
 			if(m == n)
-				shift = Matrix((est*eye(m)));
-				Ainv = A - shift;
-				Ainv = inv(Ainv);
 				current_vector = Matrix(zeros(n, 1) + 1);
 				next_vector = current_vector;
 
 				for(it = 1:iterations)
 
-					next_it = ge_linsolve(Ainv, current_vector);
+					next_it = ge_linsolve(A, current_vector);
 					next_vector = next_it.normalize();
 					current_vector = next_vector;
 				end
